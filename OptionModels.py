@@ -177,27 +177,26 @@ class ImpliedVolatility:
         #     _sigma += diff/vega
         # return _sigma
 
+if __name__ == '__main__':
+    spot=90.5
+    strike= 92.0
+    vol= 0.19
+    r= 0.053
+    T= 85
+    opt= 'call'
 
-### Test 
-spot=90.5
-strike= 92.0
-vol= 0.19
-r= 0.053
-T= 85
-opt= 'call'
+    bs= BlackScholes(S= spot, K= strike, V= vol, r= r, T= T, opt= opt)
+    print(f'''
+    <Option>
+    
+    Type:  {bs.option.type.upper()}
+    Value: {round(bs.option.value, 3)}
 
-bs= BlackScholes(S= spot, K= strike, V= vol, r= r, T= T, opt= opt)
-print(f'''
-<Option>
- 
-Type:  {bs.option.type.upper()}
-Value: {round(bs.option.value, 3)}
+    <Greeks>
 
-<Greeks>
-
-Delta:  {round(bs.option.delta,3)}
-Gamma:  {round(bs.option.gamma,3)}
-Vega:   {round(bs.option.vega,3)}
-Theta:  {round(bs.option.theta,3)}
-Rho:    {round(bs.option.rho,3)}
-''')
+    Delta:  {round(bs.option.delta,3)}
+    Gamma:  {round(bs.option.gamma,3)}
+    Vega:   {round(bs.option.vega,3)}
+    Theta:  {round(bs.option.theta,3)}
+    Rho:    {round(bs.option.rho,3)}
+    ''')
