@@ -299,6 +299,3 @@ if __name__ == '__main__' and False:
 
     # import inspect
     # print(inspect.getmembers(gk.option))
-
-
-    pass
