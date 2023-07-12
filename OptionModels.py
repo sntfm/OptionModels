@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.stats import norm
 
+class GeneralizedBlackScholes:
+    pass
+
 class Black76:
     pass
 
@@ -296,3 +299,6 @@ if __name__ == '__main__' and False:
 
     # import inspect
     # print(inspect.getmembers(gk.option))
+
+
+    pass
