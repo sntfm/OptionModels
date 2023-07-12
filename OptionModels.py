@@ -243,6 +243,7 @@ if __name__ == '__main__' and False:
     opt= 'call'
 
     bs= BlackScholes(S= spot, K= strike, V= vol, r= r, T= T, opt= opt)
+    
     print(f'''
     Reference:
     Spot:   {bs.option.S}    Strike: {bs.option.K}
