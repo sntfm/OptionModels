@@ -11,11 +11,12 @@ class BlackScholes:
             self.S, self.K, self.V, self.r, self.type = S, K, V, r, opt
             self.T, self.t = T/365, t/365
             self.tau = self.T - self.t
+
             # d1d2
             self.d1= (np.log(self.S/self.K) + (self.r + (self.V**2)/2)*self.tau)\
-            /(self.V*np.sqrt(self.tau))
-
+                        /(self.V*np.sqrt(self.tau))
             self.d2= self.d1 - self.V*np.sqrt(self.tau)
+
             # value and greeks
             self.value= value
             self.delta= None
@@ -97,9 +98,9 @@ class GarmanKohlhagen:
 
             # d1d2
             self.d1 = (np.log(self.S/self.K) + (self.rd - self.rf + (self.V**2)/2)*self.tau)\
-            /(self.V*np.sqrt(self.tau))
-
+                        /(self.V*np.sqrt(self.tau))
             self.d2 = self.d1 - self.V*np.sqrt(self.tau)
+
             # value and greeks
             self.value= value
             self.delta= None
