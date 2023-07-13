@@ -9,7 +9,7 @@ class Black76:
 
 class BlackScholes:
     class OptionBS:
-        def __init__(self, S= None, K= None, V= None, r= None, T= None, t=0, opt= 'call', value= None):
+        def __init__(self, S= None, K= None, V= None, r= None, T= None, t=0, opt= 'call', price= None):
             # market input
             self.S, self.K, self.V, self.r, self.type = S, K, V, r, opt
             self.T, self.t = T/365, t/365
@@ -20,34 +20,45 @@ class BlackScholes:
                         /(self.V*np.sqrt(self.tau))
             self.d2= self.d1 - self.V*np.sqrt(self.tau)
 
-            # value and greeks
-            self.value= value
+            # price and greeks
+            self.price= price
             self.delta= None
             self.gamma= None
             self.vega= None
             self.theta= None
             self.rho= None
 
-    def __init__(self, S= None, K= None, V= None, r= None, T= None, t= 0, opt= 'call', value= None):
-            self.option= self.OptionBS(S= S, K= K, V= V, r= r, T= T, t= t,  opt= opt, value= value)
-            self.value(self.option)
+            self.timevalue = None
+            self.intrvalue = None
+
+    def __init__(self, S= None, K= None, V= None, r= None, T= None, t= 0, opt= 'call', price= None):
+            self.option= self.OptionBS(S= S, K= K, V= V, r= r, T= T, t= t,  opt= opt, price= price)
+            self.price(self.option)
             self.delta(self.option)
             self.gamma(self.option)
             self.vega(self.option)
             self.theta(self.option)
             self.rho(self.option)
+            self.timevalue(self.option)
 
-    def value(self, option):
+    def price(self, option):
         if option.type == 'call':    
-            valueCall = option.S * norm.cdf(option.d1, 0, 1) - \
+            priceCall = option.S * norm.cdf(option.d1, 0, 1) - \
                 option.K * np.exp(-option.r * option.tau) * norm.cdf(option.d2, 0, 1)
-            option.value= valueCall
-            return valueCall
+            option.price= priceCall
+            return priceCall
         elif option.type == 'put':
-            valuePut = option.K * np.exp(-option.r * option.tau) * norm.cdf(-option.d2, 0, 1) - \
+            pricePut = option.K * np.exp(-option.r * option.tau) * norm.cdf(-option.d2, 0, 1) - \
                 option.S * norm.cdf(-option.d1, 0, 1)
-            option.value= valuePut
-            return valuePut
+            option.price= pricePut
+            return pricePut
+
+    def timevalue(self, option):
+        timevalue= option.price + option.tau*option.theta*365
+        option.timevalue= timevalue
+        intrvalue= option.price - timevalue
+        option.intrvalue= intrvalue
+        return timevalue, intrvalue
 
     def delta(self, option):
         if option.type == 'call':
@@ -93,7 +104,7 @@ class BlackScholes:
 
 class GarmanKohlhagen:
     class OptionGK:
-        def __init__(self, S= None, K= None, V= None, rd= None, rf= None, T= None, t=0, opt= 'call', value= None):
+        def __init__(self, S= None, K= None, V= None, rd= None, rf= None, T= None, t=0, opt= 'call', price= None):
             # market input
             self.S, self.K, self.V, self.rd, self.rf, self.type = S, K, V, rd, rf, opt
             self.T, self.t = T/365, t/365
@@ -104,8 +115,8 @@ class GarmanKohlhagen:
                         /(self.V*np.sqrt(self.tau))
             self.d2 = self.d1 - self.V*np.sqrt(self.tau)
 
-            # value and greeks
-            self.value= value
+            # price and greeks
+            self.price= price
             self.delta= None
             self.gamma= None
             self.vega= None
@@ -113,27 +124,38 @@ class GarmanKohlhagen:
             self.rho_d= None
             self.rho_f= None
 
-    def __init__(self, S= None, K= None, V= None, rd= None, rf= None, T= None, t= 0, opt= 'call', value= None):
-        self.option= self.OptionGK(S= S, K= K, V= V, rd= rd, rf= rf, T= T, t= t,  opt= opt, value= value)
-        self.value(self.option)
+            self.timevalue = None
+            self.intrvalue = None
+
+    def __init__(self, S= None, K= None, V= None, rd= None, rf= None, T= None, t= 0, opt= 'call', price= None):
+        self.option= self.OptionGK(S= S, K= K, V= V, rd= rd, rf= rf, T= T, t= t,  opt= opt, price= price)
+        self.price(self.option)
         self.delta(self.option)
         self.gamma(self.option)
         self.vega(self.option)
         self.theta(self.option)
         self.rho_d(self.option)
         self.rho_f(self.option)
+        self.timevalue(self.option)
 
-    def value(self, option):
+    def price(self, option):
         if option.type == 'call':    
-            valueCall = option.S * np.exp(-option.rf*option.tau) * norm.cdf(option.d1, 0, 1)\
+            priceCall = option.S * np.exp(-option.rf*option.tau) * norm.cdf(option.d1, 0, 1)\
                 - option.K * np.exp(-option.rd*option.tau) * norm.cdf(option.d2, 0, 1)
-            option.value= valueCall
-            return valueCall
+            option.price= priceCall
+            return priceCall
         elif option.type == 'put':
-            valuePut = option.K * np.exp(-option.rd*option.tau) * norm.cdf(-option.d2, 0, 1)\
+            pricePut = option.K * np.exp(-option.rd*option.tau) * norm.cdf(-option.d2, 0, 1)\
                 - option.S * np.exp(-option.rf*option.tau) * norm.cdf(-option.d1, 0, 1)
-            option.value= valuePut
-        return valuePut
+            option.price= pricePut
+        return pricePut
+
+    def timevalue(self, option):
+        timevalue= option.price + option.tau*option.theta*365
+        option.timevalue= timevalue
+        intrvalue= option.price - timevalue
+        option.intrvalue= intrvalue
+        return timevalue, intrvalue
 
     def delta(self, option):
         if option.type == 'call':
@@ -198,7 +220,7 @@ class CoxRossRubenstein:
 
 class ImpliedVolatility:
     pass
-    # def impvol(self, S, K, r, T, opt, value, t=0, maxiter= 50, tol= 0.01, initvol= 0.5, alpha= 0.01):
+    # def impvol(self, S, K, r, T, opt, price, t=0, maxiter= 50, tol= 0.01, initvol= 0.5, alpha= 0.01):
     #     'Newton Raphson fast approximation'
     #     T= T/365
     #     t= t/365
@@ -207,11 +229,11 @@ class ImpliedVolatility:
 
     # while i < maxiter:
     #     option= self.Option(S= S, K= K, r= r, T= T, V= impvol, opt= opt)
-    #     self.value(option)
-    #     print(option.value)
-    #     diff= -value + self.value(option)
+    #     self.price(option)
+    #     print(option.price)
+    #     diff= -price + self.price(option)
     #     vega= self.vega(option)
-    #     print(i, diff, vega, impvol, self.value(option))
+    #     print(i, diff, vega, impvol, self.price(option))
 
     #     if abs(diff) <= tol:
     #         break
@@ -252,7 +274,7 @@ if __name__ == '__main__' and False:
     <Option>  
 
     Type:  {bs.option.type.upper()}
-    Value: {round(bs.option.value, 3)}
+    price: {round(bs.option.price, 3)}
 
     <Greeks>
 
@@ -284,7 +306,7 @@ if __name__ == '__main__' and False:
     <Option>  
 
     Type:  {gk.option.type.upper()}
-    Value: {round(gk.option.value, 3)}
+    price: {round(gk.option.price, 3)}
 
     <Greeks>
 
