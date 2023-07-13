@@ -28,8 +28,9 @@ class BlackScholes:
             self.theta= None
             self.rho= None
 
-            self.timevalue = None
-            self.intrvalue = None
+            self.timedecay = None
+            self.intvalue = None
+            self.optvalue = None
 
     def __init__(self, S= None, K= None, V= None, r= None, T= None, t= 0, opt= 'call', price= None):
             self.option= self.OptionBS(S= S, K= K, V= V, r= r, T= T, t= t,  opt= opt, price= price)
@@ -39,7 +40,7 @@ class BlackScholes:
             self.vega(self.option)
             self.theta(self.option)
             self.rho(self.option)
-            self.timevalue(self.option)
+            self.price_attr(self.option)
 
     def price(self, option):
         if option.type == 'call':    
@@ -53,12 +54,20 @@ class BlackScholes:
             option.price= pricePut
             return pricePut
 
-    def timevalue(self, option):
-        timevalue= option.price + option.tau*option.theta*365
-        option.timevalue= timevalue
-        intrvalue= option.price - timevalue
-        option.intrvalue= intrvalue
-        return timevalue, intrvalue
+    def price_attr(self, option):
+        timedecay= option.tau*option.theta*365
+        option.timedecay= timedecay
+
+        if option.type == 'call':
+            intvalue= max(0, option.S - option.K)
+            option.intvalue= intvalue
+        if option.type == 'put':
+            intvalue= max(0, option.K - option.S)
+            option.intvalue= intvalue
+
+        optvalue= option.price - option.intvalue + timedecay
+        option.optvalue= optvalue
+        return timedecay, intvalue, optvalue
 
     def delta(self, option):
         if option.type == 'call':
@@ -124,8 +133,9 @@ class GarmanKohlhagen:
             self.rho_d= None
             self.rho_f= None
 
-            self.timevalue = None
-            self.intrvalue = None
+            self.timedecay = None
+            self.intvalue = None
+            self.optvalue = None
 
     def __init__(self, S= None, K= None, V= None, rd= None, rf= None, T= None, t= 0, opt= 'call', price= None):
         self.option= self.OptionGK(S= S, K= K, V= V, rd= rd, rf= rf, T= T, t= t,  opt= opt, price= price)
@@ -136,7 +146,7 @@ class GarmanKohlhagen:
         self.theta(self.option)
         self.rho_d(self.option)
         self.rho_f(self.option)
-        self.timevalue(self.option)
+        self.price_attr(self.option)
 
     def price(self, option):
         if option.type == 'call':    
@@ -150,12 +160,20 @@ class GarmanKohlhagen:
             option.price= pricePut
         return pricePut
 
-    def timevalue(self, option):
-        timevalue= option.price + option.tau*option.theta*365
-        option.timevalue= timevalue
-        intrvalue= option.price - timevalue
-        option.intrvalue= intrvalue
-        return timevalue, intrvalue
+    def price_attr(self, option):
+        timedecay= option.tau*option.theta*365
+        option.timedecay= timedecay
+
+        if option.type == 'call':
+            intvalue= max(0, option.S - option.K)
+            option.intvalue= intvalue
+        if option.type == 'put':
+            intvalue= max(0, option.K - option.S)
+            option.intvalue= intvalue
+
+        optvalue= option.price - option.intvalue + timedecay
+        option.optvalue= optvalue
+        return timedecay, intvalue, optvalue
 
     def delta(self, option):
         if option.type == 'call':
